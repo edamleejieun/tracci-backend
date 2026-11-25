@@ -1,0 +1,92 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.5'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.tracci'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring Boot Web + Validation
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Spring Data Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // Spring Boot Actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // MyBatis-Plus (Spring Boot 3 专用 starter)
+    implementation 'com.baomidou:mybatis-plus-spring-boot3-starter:3.5.7'
+
+    // PostgreSQL Driver
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // Database migrations (PostgreSQL only; disabled in test profile)
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+
+    // JWT (JJWT 0.12.x)
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+    // BCrypt（仅 PasswordEncoder，不引入完整 Spring Security）
+    implementation 'org.springframework.security:spring-security-crypto'
+
+    // SpringDoc OpenAPI 3 (Swagger UI)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+
+    // Tencent COS Java SDK
+    implementation 'com.qcloud:cos_api:5.6.241'
+
+    // Aliyun Phone Number Verification Service (PNVS)
+    implementation 'com.aliyun:dypnsapi20170525:2.0.0'
+
+    // Tencent Cloud SES（邮件推送）Java SDK
+    implementation 'com.tencentcloudapi:tencentcloud-sdk-java-ses:3.1.1475'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'com.h2database:h2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.register('generateDemoJourneyContract', JavaExec) {
+    group = 'verification'
+    description = 'Generates the versioned Demo journey JSON contract, metadata and COS asset manifest.'
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.tracci.module.demo.contract.DemoJourneyContractGenerator'
+    args layout.buildDirectory.dir('contracts').get().asFile.absolutePath
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('generateDemoJourneyContract')
+}

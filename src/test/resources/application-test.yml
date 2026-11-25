@@ -1,0 +1,131 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:tracci;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;NON_KEYWORDS=value,user
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  flyway:
+    enabled: false
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+
+tracci:
+  demo:
+    journey:
+      enabled: false
+      schema-version: 1
+      content-version: 2026.07.31.7
+      cos-object-key-prefix: system/demo-journey/v1
+  request-logging:
+    enabled: true
+    skip-path-patterns:
+      - /actuator/health
+      - /actuator/info
+
+  amap:
+    enabled: true
+    web-service-key: test-amap-key
+    poi:
+      endpoint: https://restapi.amap.com/v5/place/text
+      detail-endpoint: https://restapi.amap.com/v5/place/detail
+      default-page-size: 10
+      max-page-size: 20
+      timeout-ms: 1000
+      cache-ttl-minutes: 60
+    weather:
+      enabled: true
+      endpoint: https://restapi.amap.com/v3/weather/weatherInfo
+      timeout-ms: 1000
+      max-forecast-days: 4
+      max-supported-days: 4
+      cache-ttl-minutes: 60
+      unavailable-cache-ttl-minutes: 360
+      provider-error-cache-ttl-minutes: 3
+  location:
+    default-provider: AMAP
+    ios-provider: DISABLED
+    wechat-mini-provider: AMAP
+    enable-amap-for-ios: false
+  weather:
+    default-provider: AMAP
+    ios-provider: APPLE_CLIENT
+    wechat-mini-provider: AMAP
+    enable-amap-for-ios: false
+  jwt:
+    secret-key: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+    access-token-expire: 7200
+    refresh-token-expire: 2592000
+  auth:
+    public-path-patterns:
+      - /actuator/health
+      - /actuator/info
+      - /swagger-ui/**
+      - /swagger-ui.html
+      - /v3/api-docs/**
+      - /api/v1/auth/register
+      - /api/v1/auth/login
+      - /api/v1/auth/password/reset/email-code
+      - /api/v1/auth/password/reset
+      - /api/v1/auth/wechat-mini/login
+      - /api/v1/auth/wechat-app/login
+      - /api/v1/auth/phone/one-tap-login
+      - /api/v1/auth/refresh
+      - /api/v1/public/**
+    test-accounts:
+      enabled: true
+      accounts:
+        - login-id: admin
+          password: admin123456
+          email: admin@tracci.local
+    features:
+      email-reset-password-enabled: true
+
+  # test 环境：测试账号 admin@tracci.local 拥有 admin 权限
+  admin:
+    auto-create-enabled: false
+    user-ids: []
+    admin-emails:
+      - admin@tracci.local
+    default-password: admin123456
+  integration:
+    sms:
+      mock: true
+      provider: MOCK
+      mock-fixed-code: "123456"
+    email:
+      mock: true
+    cos:
+      enabled: true
+      mock: true
+      secret-id: mock-secret-id
+      secret-key: mock-secret-key
+      region: ap-guangzhou
+      bucket: test-bucket
+      ci:
+        enabled: true
+        thumbnail-rule: "imageMogr2/thumbnail/720x/quality/85"
+        preview-rule: "imageView2/2/w/1080/q/85"
+        export-rule: "imageMogr2/thumbnail/1080x>/quality/90"
+        story-portrait-rule: "imageMogr2/scrop/1080x1920/format/webp/quality/88"
+        story-card-rule: "imageMogr2/scrop/1080x1440/format/webp/quality/88"
+        square-rule: "imageMogr2/scrop/720x720/format/webp/quality/85"
+        watermark-enabled: false
+        watermark-rule: ""
+    tencent-wsa:
+      enabled: false
+    exchange-rate:
+      mock: true
+      api-key: mock-api-key
+      base-url: https://v6.exchangerate-api.com
+  wechat:
+    mini-program:
+      mock: true
+      app-id: test-app-id
+      app-secret: test-app-secret
+      timeout-ms: 1000
+    app:
+      mock: true
+      app-id: test-app-id
+      app-secret: test-app-secret
+      timeout-ms: 1000

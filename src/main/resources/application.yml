@@ -1,0 +1,209 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: tracci-backend
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    # Existing prod/dev DBs were initialized manually (init-postgres + partial alter scripts).
+    # Baseline at V1 on first Flyway run, then apply V2+ incrementally.
+    baseline-on-migrate: true
+    baseline-version: 1
+    baseline-description: manual init-postgres and partial alter scripts
+    validate-on-migrate: true
+  jackson:
+    default-property-inclusion: non_null
+    time-zone: UTC
+    date-format: yyyy-MM-dd HH:mm:ss
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    db-config:
+      logic-delete-field: deletedAt
+      logic-delete-value: "now()"
+      logic-not-delete-value: "null"
+      id-type: assign_uuid
+  mapper-locations: classpath:/mapper/*.xml
+  type-aliases-package: com.tracci.module.**.entity
+
+tracci:
+  amap:
+    enabled: true
+    web-service-key: ${AMAP_WEB_SERVICE_KEY:}
+    poi:
+      endpoint: https://restapi.amap.com/v5/place/text
+      detail-endpoint: https://restapi.amap.com/v5/place/detail
+      default-page-size: 10
+      max-page-size: 20
+      timeout-ms: 3000
+      cache-ttl-minutes: 60
+    weather:
+      enabled: true
+      endpoint: https://restapi.amap.com/v3/weather/weatherInfo
+      timeout-ms: 3000
+      max-forecast-days: 4
+      max-supported-days: 4
+      cache-ttl-minutes: 60
+      unavailable-cache-ttl-minutes: 360
+      provider-error-cache-ttl-minutes: 3
+
+  # 地点搜索 Provider 路由：小程序默认 AMAP；iOS 上架默认 DISABLED（POI 由 Apple MapKit 客户端完成）
+  location:
+    default-provider: AMAP
+    ios-provider: DISABLED
+    wechat-mini-provider: AMAP
+    enable-amap-for-ios: false
+
+  # 天气 Provider 路由：小程序默认 AMAP；iOS 默认 APPLE_CLIENT（由 WeatherKit 客户端查询）
+  weather:
+    default-provider: AMAP
+    ios-provider: APPLE_CLIENT
+    wechat-mini-provider: AMAP
+    enable-amap-for-ios: false
+
+  # 跨域：在 application-dev.yml / application-prod.yml 中按需配置 allowed-origin-patterns
+  cors:
+    allowed-origin-patterns: []
+
+  # 统一接口请求摘要日志：只记录 method/path/status/耗时/userId/ip/requestId/UA，不记录 body/token。
+  request-logging:
+    enabled: true
+    skip-path-patterns:
+      - /actuator/health
+      - /actuator/info
+
+  expense:
+    # MVP only supports CNY. Turn on when real multi-currency exchange is ready.
+    multi-currency-enabled: false
+
+  demo:
+    journey:
+      # P2 Fixture is available; keep disabled until Demo COS assets and clients are approved.
+      enabled: ${TRACCI_DEMO_JOURNEY_ENABLED:false}
+      schema-version: 1
+      content-version: ${TRACCI_DEMO_JOURNEY_CONTENT_VERSION:2026.07.31.7}
+      # Required before enabling; object keys are resolved through the existing private COS client.
+      cos-object-key-prefix: ${TRACCI_DEMO_JOURNEY_COS_OBJECT_KEY_PREFIX:}
+
+
+  trip:
+    destination-cover:
+      enabled: true
+      # 国内城市预置封面：运营上传到 COS
+      # 完整路径 system/destination-covers/v1/cities/{cityKey}.jpg（如 chongqing.jpg）
+      # 未配置公开访问域名时，响应使用私有桶预签名 URL
+      cities-object-key-prefix: system/destination-covers/v1/cities
+      fallback-object-key: system/destination-covers/default.jpg
+      cache-ttl-minutes: 4320
+
+  integration:
+    # 手机号认证通道：小程序/iOS 绑定手机号短信验证码，iOS 本机号码一键登录
+    sms:
+      mock: true
+      # Mock 模式可配置固定验证码；真实通道统一使用下方阿里云 PNVS
+      mock-fixed-code: ${TRACCI_SMS_MOCK_FIXED_CODE:}
+
+    aliyun-pnvs:
+      access-key-id: ${ALIYUN_PNVS_ACCESS_KEY_ID:}
+      access-key-secret: ${ALIYUN_PNVS_ACCESS_KEY_SECRET:}
+      endpoint: ${ALIYUN_PNVS_ENDPOINT:dypnsapi.aliyuncs.com}
+      region-id: ${ALIYUN_PNVS_REGION_ID:cn-hangzhou}
+      country-code: ${ALIYUN_PNVS_COUNTRY_CODE:86}
+      scheme-name: ${ALIYUN_PNVS_SCHEME_NAME:}
+      # 号码认证控制台中的系统赠送签名与配套赠送模板
+      sign-name: ${ALIYUN_PNVS_SIGN_NAME:}
+      template-code: ${ALIYUN_PNVS_TEMPLATE_CODE:}
+      # 必须包含 ##code##，阿里云生成验证码后 CheckSmsVerifyCode 才能核验
+      template-param: ${ALIYUN_PNVS_TEMPLATE_PARAM:}
+      valid-time-seconds: ${ALIYUN_PNVS_VALID_TIME_SECONDS:300}
+      interval-seconds: ${ALIYUN_PNVS_INTERVAL_SECONDS:60}
+
+    # 邮件推送（SES）配置（默认 Mock；生产通过环境变量覆盖为腾讯云真实通道）
+    email:
+      mock: true
+      secret-id: ${TENCENT_SES_SECRET_ID:}
+      secret-key: ${TENCENT_SES_SECRET_KEY:}
+      region: ${TENCENT_SES_REGION:ap-guangzhou}
+      from-email: ${TENCENT_SES_FROM_EMAIL:}
+      from-name: ${TENCENT_SES_FROM_NAME:趣溪}
+      reply-to: ${TENCENT_SES_REPLY_TO:}
+      trigger-type: 1
+      reset-password-template-id: ${TENCENT_SES_RESET_PASSWORD_TEMPLATE_ID:}
+      reset-password-subject: ${TENCENT_SES_RESET_PASSWORD_SUBJECT:【趣溪】找回密码验证码}
+      bind-email-template-id: ${TENCENT_SES_BIND_EMAIL_TEMPLATE_ID:}
+      bind-email-subject: ${TENCENT_SES_BIND_EMAIL_SUBJECT:【趣溪】绑定邮箱验证码}
+
+    tencent-wsa:
+      enabled: ${TRACCI_TENCENT_WSA_ENABLED:false}
+      secret-id: ${TRACCI_TENCENT_WSA_SECRET_ID:}
+      secret-key: ${TRACCI_TENCENT_WSA_SECRET_KEY:}
+      endpoint: ${TRACCI_TENCENT_WSA_ENDPOINT:https://wsa.tencentcloudapi.com}
+      mode: ${TRACCI_TENCENT_WSA_MODE:}
+      default-limit: ${TRACCI_TENCENT_WSA_DEFAULT_LIMIT:10}
+      timeout-ms: ${TRACCI_TENCENT_WSA_TIMEOUT_MS:5000}
+
+  auth:
+    # JWT 过滤器跳过鉴权的路径（Ant 风格）
+    public-path-patterns:
+      - /actuator/health
+      - /actuator/info
+      - /swagger-ui/**
+      - /swagger-ui.html
+      - /v3/api-docs/**
+      - /api/v1/auth/register
+      - /api/v1/auth/login
+      - /api/v1/auth/password/reset/email-code
+      - /api/v1/auth/password/reset
+      - /api/v1/auth/wechat-mini/login
+      - /api/v1/auth/wechat-app/login
+      - /api/v1/auth/phone/one-tap-login
+      - /api/v1/auth/refresh
+      - /api/v1/public/**
+
+    # 认证功能配置（登录方式始终可用，由前端控制展示）
+    features:
+      email-reset-password-enabled: true
+
+    # 测试账号白名单（dev/test 开启，prod 关闭）
+    test-accounts:
+      enabled: false
+
+  # 内部运营模块管理员白名单
+  # user-ids: 直接匹配 users.id
+  # admin-emails: 当 userId 不匹配时，通过 users.email 二次校验（覆盖 test account 等 UUID userId 场景）
+  admin:
+    user-ids: []
+    admin-emails: []
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  packages-to-scan: com.tracci
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    root: INFO
+    com.tracci: INFO

@@ -1,0 +1,13 @@
+system/demo-journey/v1/avatars/editor.png
+system/demo-journey/v1/avatars/owner.png
+system/demo-journey/v1/avatars/viewer.png
+system/demo-journey/v1/cover/hero.png
+system/demo-journey/v1/photos/disney-castle.png
+system/demo-journey/v1/photos/disney-fireworks.png
+system/demo-journey/v1/photos/lujiazui-skyline.png
+system/demo-journey/v1/photos/nanjing-road.png
+system/demo-journey/v1/photos/pudong-riverside.png
+system/demo-journey/v1/photos/shanghai-tower.png
+system/demo-journey/v1/photos/the-bund.png
+system/demo-journey/v1/photos/wukang-road.png
+system/demo-journey/v1/photos/yuyuan-garden.png

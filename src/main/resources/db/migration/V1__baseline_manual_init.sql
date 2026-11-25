@@ -1,0 +1,3 @@
+-- Flyway baseline marker for databases initialized before automated migrations.
+-- Production and dev DBs that already ran init-postgres17.sql and partial alter scripts
+-- are baselined at this version; subsequent migrations (V2+) run on startup.

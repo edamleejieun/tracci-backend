@@ -1,6 +1,6 @@
-# 旅迹 Tracci — 后端服务
+# 趣溪 Tracci — 后端服务
 
-面向「旅迹 Tracci」全旅程旅行管理产品（H5 + 微信小程序 + iOS）的 Spring Boot 后端：**旅前规划 → 旅中记录 → 旅后分享**，提供统一 REST API、JWT 鉴权、旅行域数据与第三方集成扩展点。
+面向「趣溪 Tracci」全旅程旅行管理产品（H5 + 微信小程序 + iOS）的 Spring Boot 后端：**旅前规划 → 旅中记录 → 旅后分享**，提供统一 REST API、JWT 鉴权、旅行域数据与第三方集成扩展点。
 
 ---
 
@@ -153,4 +153,4 @@
 
 ---
 
-*产品：旅迹 Tracci · 后端仓库：`tracci-backend`*
+*产品：趣溪 Tracci · 后端仓库：`tracci-backend`*
